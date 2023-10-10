@@ -1,0 +1,404 @@
+
+{% include "store/base.html" %}
+
+
+{% load static %}
+
+
+{% block content %}
+
+<style>
+    
+    body 
+    {
+        
+        background-color: gray;
+    
+    }
+
+
+</style>
+
+
+    <body>
+
+        <br>
+
+        <div class="container bg-white shadow-md p-5" style="width:500px; border-radius:20px;">
+
+            <form id="form" onsubmit="event.preventDefault();">
+
+                <div>
+
+                    <h3> <i class="fa fa-chevron-circle-right" aria-hidden="true"></i> &nbsp; Complete your order </h3>
+
+                    <p> Please enter in the relevant information below. </p>
+ 
+
+
+                    <hr>
+
+                    <br>
+
+                    <div class="form-field">
+                    
+                        <input class="form-control validate" id="name" type="text" placeholder="Full name*" autocomplete="off" value="{{shipping.full_name}}" required>
+
+                    </div>
+
+
+                    <br>
+
+
+                    <div class="form-field">
+
+                        <input class="form-control validate" id="email" type="email" placeholder="Email address*" autocomplete="off" value="{{shipping.email}}" required>
+
+                    </div>
+
+                    
+                    <br>
+
+                    
+                    <div class="form-field">
+
+                        <input class="form-control validate" id="address1" type="text" placeholder="Address 1*" autocomplete="off" value="{{shipping.address1}}" required>
+
+                    </div>
+
+
+                    <br>
+
+
+                    <div class="form-field">
+
+                        <input class="form-control validate" id="address2" type="text" placeholder="Address 2*" autocomplete="off" value="{{shipping.address2}}" required>
+
+                    </div>
+
+
+                    <br>
+
+
+                    <div class="form-field">
+
+                        <input class="form-control validate" id="city" type="text" placeholder="City*" autocomplete="off" value="{{shipping.city}}" required>
+
+                    </div>
+
+
+                    <br>
+
+
+                    <div class="form-field">
+
+                        <input class="form-control" id="state" type="text" placeholder="State (Optional)" autocomplete="off" value="{{shipping.state}}">
+
+                    </div>
+
+
+                    <br>
+
+
+                    <div class="form-field">
+
+                        <input class="form-control" id="zipcode" type="text" placeholder="Zip code (Optional)" autocomplete="off" value="{{shipping.zipcode}}">
+
+                    </div>
+            
+                </div>
+
+                <br>
+
+               <!-- <button id="complete-order" type="submit" class="btn btn-primary navbar-btn text-white"> &nbsp; Complete order </button> -->
+               
+               <script src="https://www.paypal.com/sdk/js?client-id=AajxZEwemm9rz3KBWVZmYUJQNZ8dljOLI7ctBMmj01uONfzuexcc3PgdFllI1-hKrIjkgT7c7WNowhym&currency=USD&buyer-country=US"></script>
+
+
+                <br> 
+
+                <!-- PayPal -->
+
+                <div id="paypal-button-container"></div>
+
+
+
+            </form>
+
+
+        </div>
+
+        
+
+        <br>
+
+    </body>
+
+
+    <!-- Ajax integration -->
+    
+
+    <script>
+
+      // total price 
+
+      // جلب السعر الاجمالي ووضعه في المتغير
+      var total = '{{cart.get_total}}';
+
+
+      // PayPal Script
+      // Render the PayPal button into #paypal-button-container
+      paypal.Buttons({
+
+        style: {
+            color:  'blue',
+            shape:  'pill',
+            label:  'pay',
+            layout: "vertical"
+        },
+
+        // عند تهيئة الزر (عند بدء تحميل الصفحة)
+        onInit: function(data, actions) {
+
+          // تعطيل الزر بشكل افتراضي
+          actions.disable();
+
+          // تحديد جميع العناصر التي تحتوي على الفئة "validate"
+          document.querySelectorAll('.validate').forEach(item => {
+
+            // عندما يتم إطلاق حدث keyup (عند كتابة أو تعديل محتوى الحقل)
+            item.addEventListener('keyup', event => {
+
+              // تعيين متغير order_verified إلى 'Yes' افتراضيًا
+              var order_verified = 'Yes';
+
+              // دالة لفحص ملء جميع الحقول المطلوبة
+              function checkInputs(){
+
+                $(':input[required]').each(function(){
+
+                  // إذا لم يتم ملؤها، قم بتعيين order_verified إلى 'No'
+                  if($(this).val() == ''){
+
+                    return order_verified = 'No';
+
+                  }
+
+                });
+
+                return order_verified;
+
+              }
+
+              // استدعاء دالة checkInputs لفحص حالة ملء الحقول
+              var isOrderVerified = checkInputs()
+
+              // إذا تم ملؤها بالكامل، فقم بتمكين الزر
+              if(isOrderVerified === 'Yes')
+              {
+
+                actions.enable();
+
+              }
+
+              // إذا لم يتم ملؤها بالكامل، فقم بتعطيل الزر
+              else
+              {
+
+                actions.disable();
+
+              }
+
+            });
+
+          });
+
+          // اذا كان الشخص مسجل وله معلومات شحن جاهزه
+
+          // تعيين متغير order_verified إلى 'Yes' افتراضيًا
+          var order_verified = 'Yes';
+
+          // دالة لفحص ملء جميع الحقول المطلوبة
+          function checkInputs(){
+
+            $(':input[required]').each(function(){
+
+              // إذا لم يتم ملؤها، قم بتعيين order_verified إلى 'No'
+              if($(this).val() == ''){
+
+                return order_verified = 'No';
+
+              }
+
+            });
+
+            return order_verified;
+
+          }
+
+          // استدعاء دالة checkInputs لفحص حالة ملء الحقول
+          var isOrderVerified = checkInputs()
+
+          // إذا تم ملؤها بالكامل، فقم بتمكين الزر
+          if(isOrderVerified === 'Yes')
+          {
+
+            actions.enable();
+
+          }
+
+          // إذا لم يتم ملؤها بالكامل، فقم بتعطيل الزر
+          else
+          {
+
+            actions.disable();
+
+          }
+
+        },
+
+
+
+        // Set up the transaction
+        createOrder: function(data, actions) {
+              return actions.order.create({
+                  purchase_units: [{
+                      amount: {
+                          value: total
+                      }
+                  }]
+              });
+            },
+
+
+
+
+
+
+          // Finalize the transaction
+          onApprove: function(data, actions) {
+              return actions.order.capture().then(function(orderData) {
+                  // Successful capture! For demo purposes:
+                  console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                  let transaction = orderData.purchase_units[0].payments.captures[0];
+                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+
+                    // بعد الدفع يتم معالجة الاوردرات في قاعدة البيانات والتحويل الي صفحة النجاح لو الخطأ
+                    // ajax fanctionalty
+                    $.ajax({
+
+                      type: 'POST',
+                      // التوجيه الي الكود في الرابط التالي
+                      url: '{% url "complete_order" %}',
+
+                      data: {
+
+                        name: $('#name').val(),
+                        email: $('#email').val(),
+
+                        address1: $('#address1').val(),
+                        address2: $('#address2').val(),
+                        city: $('#city').val(),
+
+                        state: $('#state').val(),
+                        zipcode: $('#zipcode').val(),
+                        
+                        // جلب رمز csrf token من الصفحة
+                        csrfmiddlewaretoken: "{{csrf_token}}",
+                        // اشارة الطلب هيا من هذا النوع
+                        action: 'post'
+                      },
+                      // الوظائف اللتي افعلها عندما تكون القيم صحيحة
+                      success:function(json){
+
+                        // console.log(json)
+
+                        window.location.replace("{% url 'payment_success' %}");
+
+                      },
+
+                      // الوظائف اللتي افعلها عندما تكون القيم خاطئه
+                      error:function(xhr, errmsg, err){
+
+                        window.location.replace("{% url 'payment_failed' %}");
+
+                      },
+
+                    });
+
+
+                });
+            }
+
+          // // Finalize the transaction
+          // onApprove: function(data, actions) {
+          //     return actions.order.capture().then(function(orderData) {
+          //         // Successful capture! For demo purposes:
+          //         console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+          //         let transaction = orderData.purchase_units[0].payments.captures[0];
+          //           alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+          //       });
+          //   }
+
+        }).render('#paypal-button-container');
+
+      
+
+
+
+
+      // add-button هنا يتم استخدام الكود عند النقر علي الزر صاحب القيمة 
+      /*
+      $(document).on('submit', function(e){
+        e.preventDefault();
+
+        $.ajax({
+
+          type: 'POST',
+          // التوجيه الي الكود في الرابط التالي
+          url: '{% url "complete_order" %}',
+
+          data: {
+
+            name: $('#name').val(),
+            email: $('#email').val(),
+
+            address1: $('#address1').val(),
+            address2: $('#address2').val(),
+            city: $('#city').val(),
+
+            state: $('#state').val(),
+            zipcode: $('#zipcode').val(),
+            
+            // جلب رمز csrf token من الصفحة
+            csrfmiddlewaretoken: "{{csrf_token}}",
+            // اشارة الطلب هيا من هذا النوع
+            action: 'post'
+          },
+          // الوظائف اللتي افعلها عندما تكون القيم صحيحة
+          success:function(json){
+
+            // console.log(json)
+
+            window.location.replace("{% url 'payment_success' %}");
+
+          },
+
+          // الوظائف اللتي افعلها عندما تكون القيم خاطئه
+          error:function(xhr, errmsg, err){
+
+            window.location.replace("{% url 'payment_failed' %}");
+
+          },
+          
+        });
+
+
+
+      })
+      */
+
+   </script>
+
+
+{% endblock %}

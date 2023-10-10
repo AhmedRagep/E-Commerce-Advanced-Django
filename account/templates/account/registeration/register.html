@@ -1,0 +1,62 @@
+{% extends 'store/base.html' %}
+
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+  <style>
+    body{
+      background-color: gray;
+    }
+  </style>
+
+  <body>
+    <br>
+
+    <div class="container bg-light shadow-md p-5 form-layout">
+
+      <h3> Create Your Account </h3>
+
+      <h5>Purchase your favourite items today </h5>
+
+      <br>
+
+      <form method="POST" autocomplete="off">
+
+        {% csrf_token %}
+
+        {{form.username|as_crispy_field}}
+
+        <br>
+
+        {{form.email|as_crispy_field}}
+
+        <br> 
+
+        {{form.password1|as_crispy_field}}
+
+        <br> 
+
+        {{form.password2|as_crispy_field}}
+
+        <br>
+
+        <button type="submit" class="btn btn-primary navbar-btn text-white w-100 p-2"> &nbsp; Create Your Account</button>
+      </form>
+
+      <br>
+
+    <div class="text-center">
+
+      <a href="{% url 'my_login' %}">Already have an account? </a>
+
+    </div>
+
+    </div>
+
+    <br>
+  </body>
+  
+{% endblock content %}

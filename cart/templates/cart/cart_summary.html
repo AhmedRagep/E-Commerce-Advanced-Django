@@ -1,0 +1,250 @@
+{% include "store/base.html" %}
+
+{% load static %}
+
+{% load mathfilters %}
+
+{% block content %}
+
+<main class="pt-5">
+    
+    <div class="container">
+      
+      <h1 class="h5"> Shopping cart </h1>
+
+	    <hr>
+
+      <!-- جلب جميع العناصر من الكارت -->
+      {% for item in cart %}
+
+      <!-- product استخدام هذا المتغير وبه والمنتجات الموجود في متغير  -->
+      {% with product=item.product %}
+        
+      
+      
+      <br>
+
+      <div class="row mb-4 border product-item">
+        
+        <div class="col-md-3 col-lg-2 order-md-first bg-light">
+        
+            <img class="img-fluid mx-auto d-block" width="200px" alt="Responsive image" src="{{product.image.url}}"> <!-- Product image -->
+        
+        </div>
+
+        
+        <div class="col-md-9 col-lg-10 ps-md-3 ps-lg-10">
+          
+          <a href="{{product.get_absolute_url}}" class="text-info text-decoration-none"> <!-- Product get absolute url -->
+          
+            <h1 class="h5 pt-2"> {{product.title}} </h1>
+          
+          </a>
+          
+          <div class="border">
+            
+            <div class="col border-bottom">
+              
+                <div class="row p-3">
+              
+                <div class="col-6"> Product </div>
+                  <!--لضرب السعر في كمية المنتج الواحد mathfilter هنا استخدام  -->
+                <div class="col-6 text-end"><span class="h6 fw-bold">$ {{product.price|mul:item.qty}} </span></div>
+            
+              </div>
+            
+            </div>
+            
+            <div class="col">
+              
+              <div class="row p-3">
+                
+                <div class="col-12">
+                  
+                  <label for="select">Qty</label>
+
+                  &nbsp; 
+                  
+                  <!-- لتحديد المنتج برقمه -->
+                  <select id="select{{product.id}}">
+                  
+                    <option selected>
+                        
+                      <!-- لتحديث كمية المنتج الحالي الي الكمية المختارة وهذا موجود في الكارت -->
+                        {{item.qty}}
+                  
+                    </option>
+                  
+                    <option value="">1</option>
+                  
+                    <option value="">2</option>
+                  
+                    <option value="">3</option>
+                  
+                    <option value="">4</option>
+                  
+                  </select>
+                  
+                  <br> <br>
+
+                  <!--لارسالة عن طريق داتا data-index="{{product.id}} -->
+                  <button type="button" data-index="{{product.id}}"
+                    class="btn btn-primary btn-sm update-button">
+                    Update
+                  
+                  </button>
+                  
+                  &nbsp;
+                  
+                  <!--لارسالة عن طريق داتا data-index="{{product.id}} -->
+                  <button type="button" data-index="{{product.id}}"
+                    class="btn btn-danger btn-sm delete-button">
+                    Delete
+        
+                  </button>
+        
+
+                </div>
+        
+            </div>
+        
+            </div>
+    
+            </div>
+    
+        </div>
+      
+    </div>
+      
+    {% endwith %}
+        
+    {% endfor %}
+
+      <div class="col-12 text-end">
+ 
+        <div class="h6 fw-bold"> Sub total: $ <div id="total" class="d-inline-flex"> {{cart.get_total}} </div></div>
+ 
+        <br>
+
+        <a href="{% url 'checkout' %}" class="btn btn-primary my-2"><i class="fa fa-chevron-circle-right" aria-hidden="true"></i> &nbsp; Proceed to checkout</a>
+
+      </div>
+
+      
+
+ 
+
+    </div>
+  
+
+ </main>
+
+ <script>
+  // Delete-button هنا يتم استخدام الكود عند النقر علي الزر صاحب الكلاس  
+  $(document).on('click', '.delete-button', function(e){
+    e.preventDefault();
+
+    $.ajax({
+
+      type: 'POST',
+      // التوجيه الي الكود في الرابط التالي
+      url: '{% url "cart_delete" %}',
+
+      data: {
+        // هذا الكود يعيد قيمة اي دي المنتج عن طريق قيمة الداتا اندكس
+        product_id : $(this).data('index'),
+        // جلب رمز csrf token من الصفحة
+        csrfmiddlewaretoken: "{{csrf_token}}",
+        // اشارة الطلب هيا من هذا النوع
+        action: 'post'
+      },
+      // الوظائف اللتي افعلها عندما تكون القيم صحيحة
+      success:function(json){
+
+        // console.log(json)
+
+        // لعمل ريلود للصفحة لكي تظهر التحديثات 
+        location.reload()
+
+        // وتغير الرقم الي كمية المنتجات اللتي جلبنها في الفيو بعد  base.html لجلب هذا الاسم من ملف 
+        document.getElementById("cart-qty").textContent = json.qty
+
+        //وتغيير القيمة الي التوتال من الفيو بعد الحذف total لجلب الايدي 
+        document.getElementById("total").textContent = json.total
+
+      },
+
+      // الوظائف اللتي افعلها عندما تكون القيم خاطئه
+      error:function(xhr, errmsg, err){
+
+      },
+      
+    });
+
+
+
+  })
+
+
+  // -------------------------------------------
+
+
+  // update-button هنا يتم استخدام الكود عند النقر علي الزر صاحب الكلاس  
+  $(document).on('click', '.update-button', function(e){
+    e.preventDefault();
+
+    var theproductid = $(this).data('index');
+
+    $.ajax({
+
+      type: 'POST',
+      // التوجيه الي الكود في الرابط التالي
+      url: '{% url "cart_update" %}',
+
+      data: {
+
+        // هذا الكود يعيد قيمة اي دي المنتج عن طريق قيمة الداتا اندكس
+        product_id : $(this).data('index'),
+
+        // هذا يجلب االكمية اللذي اطلبها من المنتج المحدد عن طريق الاختيار وياتي باللذي اخترته
+        // <!-- لتحديد المنتج برقمه -->
+        // <select id="select{{product.id}}">
+        // <option selected>
+        product_quantity :$('#select' + theproductid + ' option:selected').text(),
+
+        // جلب رمز csrf token من الصفحة
+        csrfmiddlewaretoken: "{{csrf_token}}",
+
+        // اشارة الطلب هيا من هذا النوع
+        action: 'post'
+
+      },
+      // الوظائف اللتي افعلها عندما تكون القيم صحيحة
+      success:function(json){
+
+        // console.log(json)
+
+        // لعمل ريلود للصفحة لكي تظهر التحديثات 
+        location.reload()
+
+        // وتغير الرقم الي كمية المنتجات اللتي جلبنها في الفيو بعد  base.html لجلب هذا الاسم من ملف 
+        document.getElementById("cart-qty").textContent = json.qty
+
+        //وتغيير القيمة الي التوتال من الفيو بعد الحذف total لجلب الايدي 
+        document.getElementById("total").textContent = json.total
+
+      },
+
+      // الوظائف اللتي افعلها عندما تكون القيم خاطئه
+      error:function(xhr, errmsg, err){
+
+      },
+      
+    });
+
+  })
+
+</script>
+
+{% endblock %}
+

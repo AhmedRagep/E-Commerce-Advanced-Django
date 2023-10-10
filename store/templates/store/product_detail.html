@@ -1,0 +1,144 @@
+
+{% extends "./base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+
+    <main class="pt-5">
+
+        <div class="row g-3">
+
+            <div class="col-md-5 col-lg-5 order-md-first bg-light">
+            
+                <img class="img-fluid mx-auto d-block" alt="Responsive image" src="{{detail.image.url}}"> <!-- Product image -->
+            
+            </div>
+
+            <div class="col-md-7 col-lg-7 ps-md-3 ps-lg-5">
+
+                <h1 class="mb-0 h4"> {{detail.title}}  </h1>
+
+                <strong> {{detail.brand}} </strong>
+
+
+                <hr>
+
+                <br>
+
+
+                <p> {{detail.description}} </p>
+
+                <div class="border">
+
+                    <div class="col border-bottom">
+
+                        <div class="row p-3">
+
+                            <div class="col-6"> Price </div>
+
+                            <div class="col-6 text-end"><span class="h4 fw-bold">$ {{detail.price}} </span></div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col">
+              
+                        <div class="row p-3">
+              
+                            <div class="col-6">
+              
+                               
+                                <label for="select">Qty</label>
+                                
+                                &nbsp; 
+                               
+                                <select id="select">
+              
+                                    <option value="1">1</option>
+              
+                                    <option value="2">2</option>
+              
+                                    <option value="3">3</option>
+              
+                                    <option value="4">4</option>
+              
+                                </select>
+
+                            </div>
+
+                            <div class="col-6 text-end">
+                                
+                                <button type="button" id="add-button" value="{{detail.id}}" class="btn btn-secondary btn-sm">
+                        
+                                Add to cart 
+                            
+                                </button> 
+                            
+
+                            </div>
+                        
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <br>
+
+</div>
+
+<script>
+  // add-button هنا يتم استخدام الكود عند النقر علي الزر صاحب القيمة 
+  $(document).on('click', '#add-button', function(e){
+    e.preventDefault();
+
+    $.ajax({
+
+      type: 'POST',
+      // التوجيه الي الكود في الرابط التالي
+      url: '{% url "cart_add" %}',
+
+      data: {
+        // هذا الكود يعيد قيمة اي دي المنتج عن طريق قيمة الزر
+        product_id : $('#add-button').val(),
+        // هذا يجلب عدد المنتجات اللذي اطلبها عن طريق الاختيار وياتي باللذي اخترته
+        product_quantity :$('#select option:selected').text(),
+        // جلب رمز csrf token من الصفحة
+        csrfmiddlewaretoken: "{{csrf_token}}",
+        // اشارة الطلب هيا من هذا النوع
+        action: 'post'
+      },
+      // الوظائف اللتي افعلها عندما تكون القيم صحيحة
+      success:function(json){
+
+        // console.log(json)
+
+        // وتغير الرقم الي كمية المنتجات اللتي جلبنها في الفيو base.html لجلب هذا الاسم من ملف  
+        document.getElementById("cart-qty").textContent = json.qty
+
+      },
+
+      // الوظائف اللتي افعلها عندما تكون القيم خاطئه
+      error:function(xhr, errmsg, err){
+
+      },
+      
+    });
+
+
+
+  })
+
+</script>
+
+{% endblock %}
